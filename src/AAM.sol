@@ -13,29 +13,29 @@ contract AAM {
 
     /// @notice Type of allowance
     enum AllowanceType {
-        CAP,    // Periodic reset (e.g., 100 USDC/week)
-        STREAM  // Continuous drip over time
+        CAP, // Periodic reset (e.g., 100 USDC/week)
+        STREAM // Continuous drip over time
     }
 
     /// @notice Status of an allowance
     enum Status {
-        None,    // No allowance exists
-        Active,  // Can spend
-        Paused,  // Temporarily disabled
-        Revoked  // Permanently disabled
+        None, // No allowance exists
+        Active, // Can spend
+        Paused, // Temporarily disabled
+        Revoked // Permanently disabled
     }
 
     // ============ Structs ============
 
     /// @notice Allowance configuration and state
     struct Allowance {
-        address parent;          // Who created this allowance
-        AllowanceType aType;     // CAP or STREAM
-        uint256 limit;           // Amount per period (CAP) or total drip amount (STREAM)
-        uint256 period;          // Period length in seconds
-        uint256 spent;           // Amount spent in current period (CAP) or total spent (STREAM)
-        uint256 lastReset;       // Timestamp of last reset (CAP) or creation time (STREAM)
-        Status status;           // Current status
+        address parent; // Who created this allowance
+        AllowanceType aType; // CAP or STREAM
+        uint256 limit; // Amount per period (CAP) or total drip amount (STREAM)
+        uint256 period; // Period length in seconds
+        uint256 spent; // Amount spent in current period (CAP) or total spent (STREAM)
+        uint256 lastReset; // Timestamp of last reset (CAP) or creation time (STREAM)
+        Status status; // Current status
     }
 
     // ============ State ============
@@ -54,11 +54,7 @@ contract AAM {
     event Deposit(address indexed parent, uint256 amount);
     event Withdraw(address indexed parent, uint256 amount);
     event AllowanceCreated(
-        address indexed parent,
-        address indexed child,
-        AllowanceType aType,
-        uint256 limit,
-        uint256 period
+        address indexed parent, address indexed child, AllowanceType aType, uint256 limit, uint256 period
     );
     event Spent(address indexed parent, address indexed child, address indexed recipient, uint256 amount);
     event Paused(address indexed parent, address indexed child);
@@ -91,26 +87,21 @@ contract AAM {
      * @param r Signature r
      * @param s Signature s
      */
-    function depositWithPermit(
-        uint256 amount,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external {
+    function depositWithPermit(uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
         // Call permit on USDC
-        (bool success,) = address(usdc).call(
-            abi.encodeWithSignature(
-                "permit(address,address,uint256,uint256,uint8,bytes32,bytes32)",
-                msg.sender,
-                address(this),
-                amount,
-                deadline,
-                v,
-                r,
-                s
-            )
-        );
+        (bool success,) = address(usdc)
+            .call(
+                abi.encodeWithSignature(
+                    "permit(address,address,uint256,uint256,uint8,bytes32,bytes32)",
+                    msg.sender,
+                    address(this),
+                    amount,
+                    deadline,
+                    v,
+                    r,
+                    s
+                )
+            );
         require(success, "AAM: permit failed");
 
         // Then transfer
@@ -139,12 +130,7 @@ contract AAM {
      * @param limit Spending limit per period
      * @param period Period length in seconds
      */
-    function createAllowance(
-        address child,
-        AllowanceType aType,
-        uint256 limit,
-        uint256 period
-    ) external {
+    function createAllowance(address child, AllowanceType aType, uint256 limit, uint256 period) external {
         require(balanceOf[msg.sender] >= limit, "AAM: insufficient balance");
         require(allowances[msg.sender][child].status == Status.None, "AAM: allowance exists");
         require(period > 0, "AAM: period must be positive");
@@ -206,7 +192,7 @@ contract AAM {
      */
     function spend(address parent, uint256 amount, address recipient) external {
         Allowance storage a = allowances[parent][msg.sender];
-        
+
         require(a.status != Status.None && a.status != Status.Revoked, "AAM: no allowance");
         require(a.status != Status.Paused, "AAM: allowance paused");
 
@@ -248,15 +234,19 @@ contract AAM {
      * @return lastReset Last reset timestamp
      * @return status Current status
      */
-    function getAllowance(address parent, address child) external view returns (
-        address parent_,
-        AllowanceType aType,
-        uint256 limit,
-        uint256 period,
-        uint256 spent,
-        uint256 lastReset,
-        Status status
-    ) {
+    function getAllowance(address parent, address child)
+        external
+        view
+        returns (
+            address parent_,
+            AllowanceType aType,
+            uint256 limit,
+            uint256 period,
+            uint256 spent,
+            uint256 lastReset,
+            Status status
+        )
+    {
         Allowance storage a = allowances[parent][child];
         return (a.parent, a.aType, a.limit, a.period, a.spent, a.lastReset, a.status);
     }

@@ -17,7 +17,7 @@ contract MockUSDC {
     // EIP-2612 Permit support
     bytes32 public constant PERMIT_TYPEHASH =
         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
-    
+
     mapping(address => uint256) public nonces;
     bytes32 public DOMAIN_SEPARATOR;
 
@@ -69,20 +69,12 @@ contract MockUSDC {
         return true;
     }
 
-    function permit(
-        address owner,
-        address spender,
-        uint256 value,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external {
+    function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
+        external
+    {
         require(block.timestamp <= deadline, "MockUSDC: expired deadline");
 
-        bytes32 structHash = keccak256(
-            abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline)
-        );
+        bytes32 structHash = keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline));
 
         bytes32 hash = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, structHash));
         address signer = ecrecover(hash, v, r, s);
