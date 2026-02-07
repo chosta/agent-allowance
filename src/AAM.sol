@@ -49,6 +49,15 @@ contract AAM {
     /// @notice Allowances: parent => child => Allowance
     mapping(address => mapping(address => Allowance)) private allowances;
 
+    /// @notice Children list for each parent (for enumeration)
+    mapping(address => address[]) private children;
+
+    /// @notice Parent of each child (1 parent per child model)
+    mapping(address => address) public parentOf;
+
+    /// @notice Track if child is already in parent's children array (prevents duplicates)
+    mapping(address => mapping(address => bool)) private isChild;
+
     // ============ Events ============
 
     event Deposit(address indexed parent, uint256 amount);
@@ -145,6 +154,13 @@ contract AAM {
             lastReset: block.timestamp,
             status: Status.Active
         });
+
+        // Track parent-child relationship (only if not already tracked)
+        if (!isChild[msg.sender][child]) {
+            children[msg.sender].push(child);
+            isChild[msg.sender][child] = true;
+            parentOf[child] = msg.sender;
+        }
 
         emit AllowanceCreated(msg.sender, child, aType, limit, period);
     }
@@ -261,6 +277,24 @@ contract AAM {
         Allowance storage a = allowances[parent][child];
         if (a.status != Status.Active) return 0;
         return _getAvailable(a);
+    }
+
+    /**
+     * @notice Get all children of a parent (includes revoked, filter by status in UI)
+     * @param parent Parent address
+     * @return Array of child addresses
+     */
+    function getChildren(address parent) external view returns (address[] memory) {
+        return children[parent];
+    }
+
+    /**
+     * @notice Get the parent of a child
+     * @param child Child address
+     * @return Parent address (address(0) if no parent)
+     */
+    function getParent(address child) external view returns (address) {
+        return parentOf[child];
     }
 
     // ============ Internal Functions ============

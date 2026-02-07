@@ -12,3 +12,7 @@ docs/
 
 # Dotenv file
 .env
+.env.testnet
+
+# Generated files
+tx_hashes.txt
