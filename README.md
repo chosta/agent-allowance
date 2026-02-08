@@ -30,7 +30,13 @@ PRIVATE_KEY=0x... USDC_ADDRESS=0x3600000000000000000000000000000000000000 \
 
 **Live Contract:** `0x41c7e0eBf40Fe2d95C6ffd967cD210D4Bab30c72` on Arc Testnet
 
+## 🎥 Demo
+
+Watch the 30-second demo: [**Video Demo**](https://drive.google.com/file/d/1b76tfh-qczCWHPOHWFJxKE3ecRRJxr5k/view)
+
 ## 🖥️ Dashboard
+
+![AAM Dashboard](./assets/dashboard-main.jpg)
 
 Human-friendly interface for managing agent allowances.
 
