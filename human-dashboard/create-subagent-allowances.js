@@ -13,10 +13,19 @@ const arcTestnet = {
 const AAM_ADDRESS = '0x41c7e0eBf40Fe2d95C6ffd967cD210D4Bab30c72';
 const USDC_ADDRESS = '0x3600000000000000000000000000000000000000';
 
+// Load private key from environment
+import 'dotenv/config';
+
+if (!process.env.PRIVATE_KEY) {
+  console.error('Error: PRIVATE_KEY environment variable is required');
+  console.error('Copy .env.example to .env and set your private key');
+  process.exit(1);
+}
+
 // Addresses
 const DONI = '0xb67E430818807282AA0aB08A139fe55e6Bad171b';
 const CLAUDE = '0x7b4F4F0F01DB4Fc1e32b74ed4540A801036Fb876';
-const CLAUDE_KEY = '0xf8e7f370aaa79ab12020b5973702a8d5770d35624205144efdcc0524d2af1ac6';
+const CLAUDE_KEY = process.env.PRIVATE_KEY;
 
 // Claude's sub-agents
 const CLAUDE_SUBS = [

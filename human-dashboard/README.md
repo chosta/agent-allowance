@@ -1,73 +1,82 @@
-# React + TypeScript + Vite
+# AAM Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Human-friendly interface for managing AI agent allowances on the Agent Allowance Manager contract.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Wallet Connect** — RainbowKit integration with auto-add for Arc Testnet
+- **3 Cyberpunk Themes** — Terminal (emerald), Amber, Void (cyan)
+- **Lookup Mode** — View any address via `?addr=0x...` URL param
+- **Hierarchy Tree** — Real-time parent→child relationship visualization
+- **Deposit/Withdraw** — Manage your USDC pool
+- **Create Allowances** — Set type (CAP/STREAM), limit, and period
+- **Allowance Controls** — Pause/Unpause/Revoke on each card
 
-## React Compiler
+## Quick Start
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
+# Open http://localhost:5173
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Environment Variables
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Create a `.env` file (see `.env.example`):
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+# Required for demo scripts only
+PRIVATE_KEY=your_private_key_here
 ```
+
+## Available Scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Start dev server |
+| `npm run build` | Production build |
+| `npm run preview` | Preview production build |
+| `npm run lint` | Run ESLint |
+| `npm run demo` | Run demo script (creates sub-agent allowances) |
+
+## Demo Scripts
+
+Located in the root of `human-dashboard/`:
+
+- `check-status.js` — View balances and allowances (read-only)
+- `create-subagent-allowances.js` — Claude creates allowances for sub-agents
+- `create-gem-subagent-allowances.js` — Gem creates allowances for sub-agents
+
+Run with:
+```bash
+node check-status.js
+PRIVATE_KEY=0x... node create-subagent-allowances.js
+```
+
+## Project Structure
+
+```
+human-dashboard/
+├── src/
+│   ├── App.tsx           # Main app with all features
+│   ├── main.tsx          # React entry point
+│   └── index.css         # Tailwind base styles
+├── public/               # Static assets
+├── *.js                  # Demo scripts
+└── package.json
+```
+
+## Tech Stack
+
+- **React 19** + TypeScript
+- **Vite** — Build tool
+- **wagmi v2** — React hooks for Ethereum
+- **RainbowKit** — Wallet connection
+- **TailwindCSS v4** — Styling
+- **viem** — TypeScript Ethereum library
+
+## Contract Details
+
+- **AAM Address:** `0x41c7e0eBf40Fe2d95C6ffd967cD210D4Bab30c72`
+- **USDC Address:** `0x3600000000000000000000000000000000000000`
+- **Network:** Arc Testnet (Chain ID: 5042002)

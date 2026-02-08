@@ -13,10 +13,19 @@ const arcTestnet = {
 const AAM_ADDRESS = '0x41c7e0eBf40Fe2d95C6ffd967cD210D4Bab30c72';
 const USDC_ADDRESS = '0x3600000000000000000000000000000000000000';
 
+// Load private key from environment
+import 'dotenv/config';
+
+if (!process.env.PRIVATE_KEY) {
+  console.error('Error: PRIVATE_KEY environment variable is required');
+  console.error('Copy .env.example to .env and set your private key');
+  process.exit(1);
+}
+
 // Addresses
 const DONI = '0xb67E430818807282AA0aB08A139fe55e6Bad171b';
 const GEM = '0x55E41ebdE0D56B8ddc4Ff3b7945e8a6F8294B2a7';
-const GEM_KEY = '0xfa2866586efa1e1a6ee4fe27655c1d7f80f817ad1ca061291170957258c57b0a';
+const GEM_KEY = process.env.PRIVATE_KEY;
 
 // Gem's sub-agents (from .env.testnet)
 const GEM_SUBS = [

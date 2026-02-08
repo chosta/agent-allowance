@@ -2,27 +2,57 @@
 
 [![CI](https://github.com/chosta/agent-allowance/actions/workflows/ci.yml/badge.svg)](https://github.com/chosta/agent-allowance/actions/workflows/ci.yml)
 
-**Stripe Issuing for AI Agents** — Give your agents USDC spending allowances with rate limits.
+**Stripe Issuing for AI Agents** — USDC spending allowances with rate limits.
 
-## Overview
+## 🏆 USDC Hackathon Submission
 
-AAM (Agent Allowance Manager) enables humans or parent agents to give child agents controlled access to USDC funds. Instead of giving agents full wallet access, you set up rate-limited allowances:
+AI agents are starting to transact on-chain — booking services, paying for compute, tipping creators. But giving an agent your private key is insane. AAM fixes this.
 
-- **CAP allowances**: Fixed budget that resets periodically (e.g., 100 USDC/week)
-- **STREAM allowances**: Continuous drip over time (e.g., 50 USDC over 30 days)
+**The Problem:** No safe way for humans to give AI agents controlled access to funds.  
+**The Solution:** On-chain allowances with rate limits, pause/revoke controls, and full accountability.  
+**Why USDC:** Stablecoins are the natural currency for agent commerce — predictable value, programmable, and Circle's infrastructure makes it production-ready.
 
-Think of it like giving your AI a prepaid card with spending limits.
+## ⚡ Quick Start
 
-## Why AAM?
+```bash
+# Clone and build
+git clone https://github.com/chosta/agent-allowance.git
+cd agent-allowance
+forge build
 
-As AI agents become more autonomous, they need to transact on-chain. But giving agents full wallet access is dangerous. AAM provides:
+# Run tests (22 passing)
+forge test
 
-- **Rate limits**: Cap spending per period
-- **Parental controls**: Pause, unpause, or revoke anytime
-- **Accountability**: All spending is logged on-chain
-- **Flexibility**: Works with any agent framework
+# Deploy to Arc Testnet
+PRIVATE_KEY=0x... USDC_ADDRESS=0x3600000000000000000000000000000000000000 \
+  forge script script/Deploy.s.sol --rpc-url https://rpc.testnet.arc.network --broadcast
+```
 
-## Architecture
+**Live Contract:** `0x41c7e0eBf40Fe2d95C6ffd967cD210D4Bab30c72` on Arc Testnet
+
+## 🖥️ Dashboard
+
+Human-friendly interface for managing agent allowances.
+
+**Features:**
+- Connect wallet with RainbowKit (auto-adds Arc Testnet)
+- 3 cyberpunk themes: Terminal (emerald), Amber, Void (cyan)
+- Lookup mode: view any address via `?addr=0x...` URL param
+- Real-time hierarchy tree showing parent→child relationships
+- Deposit/Withdraw USDC
+- Create allowances with type, limit, and period
+- Pause/Unpause/Revoke controls on allowance cards
+
+```bash
+cd human-dashboard
+npm install
+npm run dev
+# Open http://localhost:5173
+```
+
+See [`human-dashboard/README.md`](./human-dashboard/README.md) for full setup.
+
+## 🏗️ Architecture
 
 ```
 ┌─────────────┐                    ┌─────────────┐
@@ -52,7 +82,9 @@ As AI agents become more autonomous, they need to transact on-chain. But giving 
                   └─────────┘
 ```
 
-## Contract API
+**Key Innovation:** Hierarchical allowances. Parent agents can create sub-allowances for child agents, enabling multi-tier agent organizations where each level has bounded spending authority.
+
+## 📜 Contract API
 
 ### Deposit & Withdraw
 
@@ -72,13 +104,14 @@ As AI agents become more autonomous, they need to transact on-chain. But giving 
 | `unpause(child)` | Re-enable a paused allowance |
 | `revoke(child)` | Permanently disable allowance |
 
-### Spending (Child)
+### Spending (Child/Agent)
 
 | Function | Description |
 |----------|-------------|
 | `spend(parent, amount, recipient)` | Spend from allowance |
 | `getAvailable(parent, child)` | Check available spending amount |
 | `getAllowance(parent, child)` | Get full allowance details |
+| `getChildren(parent)` | List all child addresses |
 
 ### Allowance Types
 
@@ -89,90 +122,11 @@ enum AllowanceType {
 }
 ```
 
-## Usage Examples
+## 🤖 For AI Agents
 
-### Setup an Allowance (Parent)
+See **[AGENTS.md](./AGENTS.md)** for integration patterns, code snippets, and error handling.
 
-```solidity
-// 1. Approve USDC spending
-usdc.approve(address(aam), 1000e6);
-
-// 2. Deposit funds
-aam.deposit(1000e6);
-
-// 3. Create allowance: 100 USDC per week
-aam.createAllowance(
-    agentAddress,
-    AAM.AllowanceType.CAP,
-    100e6,      // 100 USDC (6 decimals)
-    1 weeks     // Period
-);
-```
-
-### Spend from Allowance (Agent)
-
-```solidity
-// Check available balance
-uint256 available = aam.getAvailable(parentAddress, myAddress);
-
-// Spend 50 USDC to a vendor
-if (available >= 50e6) {
-    aam.spend(parentAddress, 50e6, vendorAddress);
-}
-```
-
-### Control an Allowance (Parent)
-
-```solidity
-// Emergency pause
-aam.pause(agentAddress);
-
-// Resume later
-aam.unpause(agentAddress);
-
-// Permanently revoke
-aam.revoke(agentAddress);
-```
-
-## Deployment
-
-### Prerequisites
-
-- [Foundry](https://book.getfoundry.sh/getting-started/installation)
-- USDC on your target network
-- Private key with ETH for gas
-
-### Deploy to Testnet
-
-```bash
-# Set environment variables
-export PRIVATE_KEY=0x...
-export USDC_ADDRESS=0x036CbD53842c5426634e7929541eC2318f3dCF7e  # Base Sepolia
-export RPC_URL=https://sepolia.base.org
-
-# Run deployment
-forge script script/Deploy.s.sol --rpc-url $RPC_URL --broadcast
-```
-
-### USDC Addresses
-
-| Network | USDC Address |
-|---------|--------------|
-| Base Sepolia | `0x036CbD53842c5426634e7929541eC2318f3dCF7e` |
-| Arc Testnet | See [Circle Docs](https://developers.circle.com/stablecoins/docs/usdc-on-test-networks) |
-
-### Local Testing with Anvil
-
-```bash
-# Start local node
-anvil
-
-# Deploy with mock USDC
-USDC_ADDRESS=<deployed-mock> PRIVATE_KEY=<anvil-key> \
-  forge script script/Deploy.s.sol --rpc-url http://localhost:8545 --broadcast
-```
-
-## Development
+## 💻 Development
 
 ### Build
 
@@ -183,10 +137,10 @@ forge build
 ### Test
 
 ```bash
-# Run all tests
+# Run all tests (22 passing)
 forge test
 
-# Run with verbosity
+# With verbosity
 forge test -vvv
 
 # Run specific test
@@ -196,28 +150,37 @@ forge test --match-test testSpend
 ### Security Analysis
 
 ```bash
-# Install Slither
 pip install slither-analyzer
-
-# Run analysis
 slither src/ --exclude-dependencies
 ```
 
-### Format
+## 🚀 Deployment
+
+### USDC Addresses
+
+| Network | USDC Address |
+|---------|--------------|
+| Arc Testnet | `0x3600000000000000000000000000000000000000` |
+| Base Sepolia | `0x036CbD53842c5426634e7929541eC2318f3dCF7e` |
+
+### Deploy
 
 ```bash
-forge fmt
+export PRIVATE_KEY=0x...
+export USDC_ADDRESS=0x...
+export RPC_URL=https://...
+
+forge script script/Deploy.s.sol --rpc-url $RPC_URL --broadcast
 ```
 
-## Security Considerations
+## 🔒 Security
 
-- **Allowance limits are enforced on-chain** — agents cannot bypass them
-- **Parents retain full control** — can pause/revoke at any time
-- **Period resets are lazy** — gas-efficient, calculated on-demand
-- **STREAM math is bounded** — no overflow possible with reasonable values
-- **Tested with 22 passing tests** including edge cases
+- **Rate limits enforced on-chain** — agents cannot bypass them
+- **Parents retain full control** — pause/revoke at any time
+- **Lazy period resets** — gas-efficient, calculated on-demand
 - **Slither-clean** — no high/medium security issues
+- **22 passing tests** including edge cases
 
-## License
+## 📄 License
 
 MIT

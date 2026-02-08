@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "demo": "node create-subagent-allowances.js",
+    "status": "node check-status.js"
   },
   "dependencies": {
     "@rainbow-me/rainbowkit": "^2.2.10",
@@ -15,7 +17,8 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "viem": "^2.21.0",
-    "wagmi": "^2.14.0"
+    "wagmi": "^2.14.0",
+    "dotenv": "^16.4.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
